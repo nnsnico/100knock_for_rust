@@ -122,19 +122,62 @@ pub fn sec_1_7() {
 use std::char;
 
 pub fn sec_1_8() {
-    let s = "hogehoge1fugao";
-    let cipher: String = s
-        .chars()
-        .map(|c: char| {
-            if c.is_alphabetic() && c.is_lowercase() {
-                println!("{}", c);
-                println!("{}", 219 - c.len_utf8());
-                char::from_u32(219 - c.len_utf8() as u32).unwrap()
-            } else {
-                c
+    let s = "yuji toyama";
+    let cipher = |s: &str| {
+        s.chars()
+            .map(|c: char| {
+                if c.is_alphabetic() && c.is_lowercase() {
+                    char::from_u32(219 - (c as u32)).unwrap()
+                } else {
+                    c
+                }
+            })
+            .collect::<String>()
+    };
+    let decipher = |s: &str| {
+        s.chars()
+            .map(|c: char| {
+                if c.is_alphabetic() && c.is_lowercase() {
+                    char::from_u32(219 - (c as u32)).unwrap()
+                } else {
+                    c
+                }
+            })
+            .collect::<String>()
+    };
+
+    let ciphered = cipher(s);
+    let deciphered = decipher(&ciphered);
+    println!("s: {}", s);
+    println!("cihpered: {}", ciphered);
+    println!("deciphered: {}", deciphered);
+}
+
+use rand::prelude::*;
+
+pub fn sec_1_9() {
+    let s = "I couldn't believe that I could actually understand what I was reading : the phenomenal power of the human mind";
+    let v: Vec<String> = s.split_whitespace().map(|s| s.to_string()).collect();
+    let end = v.len() - 1;
+    let result: Vec<String> = v
+        .iter()
+        .enumerate()
+        .map(|(i, s): (usize, &String)| match (i, s) {
+            (i, s) if i == 0 => s.to_string(),
+            (i, s) if i == end => s.to_string(),
+            (_, s) if s.len() <= 4 => s.to_string(),
+            (_, s) => {
+                let mut chars: Vec<char> = s.to_string().chars().collect();
+                let mut rand = rand::thread_rng();
+                chars.shuffle(&mut rand);
+                return chars.iter().collect::<String>();
             }
         })
-        .collect::<String>();
+        .collect();
+
+    result
+        .iter()
+        .enumerate()
+        .for_each(|(i, s)| println!("{}: {}", i, s));
     println!("{}", s);
-    println!("{}", cipher);
 }
