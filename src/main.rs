@@ -1,5 +1,5 @@
-use knock100::chapter_01;
+use knock100::chapter_02;
 
 fn main() {
-    chapter_01::sec_1_9();
+    chapter_02::sec_2_12();
 }
