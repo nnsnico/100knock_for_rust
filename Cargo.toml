@@ -5,3 +5,4 @@ authors = ["nnsnico <y_toyama@fancs.com>"]
 edition = "2018"
 
 [dependencies]
+rand = "0.7.0"
