@@ -57,3 +57,33 @@ pub fn sec_2_12() {
 
     println!("Success!!");
 }
+
+pub fn sec_2_13() {
+    let mut col1 = fs::File::open("col1.txt").expect("file not found.");
+    let mut col2 = fs::File::open("col2.txt").expect("file not found.");
+    let mut col1_str = String::new();
+    let mut col2_str = String::new();
+
+    col1.read_to_string(&mut col1_str)
+        .expect("failed reading the flie.");
+    col2.read_to_string(&mut col2_str)
+        .expect("failed reading the flie.");
+
+    let col1_ls: Vec<String> = col1_str.split('\n').map(|s| s.to_string()).collect();
+    let col2_ls: Vec<String> = col2_str.split('\n').map(|s| s.to_string()).collect();
+
+    // TODO: 最後の改行がムダ
+    let merge_str = col1_ls
+        .iter()
+        .zip(col2_ls.iter())
+        .filter(|(s1, s2)| s1 != &"" && s2 != &"")
+        .map(|(col1, col2): (&String, &String)| {
+            [col1.to_string(), col2.to_string()].join("\t") + "\n"
+        })
+        .collect::<Vec<String>>()
+        .concat();
+
+    println!("{}", merge_str);
+}
+
+pub fn sec_2_14() {}
