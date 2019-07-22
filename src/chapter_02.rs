@@ -102,3 +102,47 @@ pub fn sec_2_14() {
 
     taked_vec.iter().for_each(|s| println!("{}", s));
 }
+
+pub fn sec_2_15() {
+    let n = 1;
+
+    let mut file = fs::File::open("hightemp.txt").expect("failed to open file.");
+    let mut s = String::new();
+    file.read_to_string(&mut s).expect("failed to read file.");
+
+    let vec = s
+        .split("\n")
+        .filter(|s| s != &"")
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>();
+    let taked_vec: Vec<&String> = vec.iter().rev().take(n).collect::<Vec<&String>>();
+
+    taked_vec.iter().rev().for_each(|s| println!("{}", s));
+}
+
+pub fn sec_2_16() {
+    let n = 1;
+
+    let mut file = fs::File::open("hightemp.txt").expect("failed to open file.");
+    let mut s = String::new();
+    file.read_to_string(&mut s).expect("failed to read file.");
+
+    let vec = s
+        .split("\n")
+        .filter(|s| s != &"")
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>();
+
+    let splited_vec = vec
+        .chunks(n)
+        .map(|v| v.to_vec())
+        .collect::<Vec<Vec<String>>>();
+
+    splited_vec.iter().enumerate().for_each(|(i, v)| {
+        let cmp_str = v.iter().map(|s| format!("{}\n", s)).collect::<String>();
+        let mut f = fs::File::create(format!("out{}.txt", i)).expect("failed to create file.");
+        write!(f, "{}", cmp_str).expect("failed to write file.");
+    });
+
+    println!("Success!");
+}
