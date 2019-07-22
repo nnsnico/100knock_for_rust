@@ -72,18 +72,33 @@ pub fn sec_2_13() {
     let col1_ls: Vec<String> = col1_str.split('\n').map(|s| s.to_string()).collect();
     let col2_ls: Vec<String> = col2_str.split('\n').map(|s| s.to_string()).collect();
 
-    // TODO: 最後の改行がムダ
     let merge_str = col1_ls
         .iter()
         .zip(col2_ls.iter())
         .filter(|(s1, s2)| s1 != &"" && s2 != &"")
-        .map(|(col1, col2): (&String, &String)| {
-            [col1.to_string(), col2.to_string()].join("\t") + "\n"
-        })
+        .map(|(col1, col2): (&String, &String)| format!("{}\t{}\n", col1, col2))
         .collect::<Vec<String>>()
         .concat();
 
-    println!("{}", merge_str);
+    let mut merge_file = fs::File::create("merge.txt").expect("failed to create file.");
+    write!(merge_file, "{}", merge_str).expect("failed to write file");
+
+    println!("Success!");
 }
 
-pub fn sec_2_14() {}
+pub fn sec_2_14() {
+    let n = 5;
+
+    let mut file = fs::File::open("hightemp.txt").expect("failed to open file.");
+    let mut s = String::new();
+    file.read_to_string(&mut s).expect("failed to read file.");
+
+    let vec = s
+        .split("\n")
+        .filter(|s| s != &"")
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>();
+    let taked_vec: Vec<&String> = vec.iter().take(n).collect::<Vec<&String>>();
+
+    taked_vec.iter().for_each(|s| println!("{}", s));
+}
