@@ -146,3 +146,42 @@ pub fn sec_2_16() {
 
     println!("Success!");
 }
+
+use std::collections::HashSet;
+
+pub fn sec_2_17() {
+    let mut file = fs::File::open("col1.txt").expect("failed to open file.");
+    let mut s = String::new();
+    file.read_to_string(&mut s).expect("failed to read file.");
+
+    let set = s
+        .split("\n")
+        .filter(|s| !s.to_string().is_empty())
+        .collect::<HashSet<&str>>();
+
+    set.iter().for_each(|s| println!("{}", s));
+}
+
+use std::collections::HashMap;
+
+pub fn sec_2_18() {
+    let mut file = fs::File::open("hightemp.txt").expect("failed to open file.");
+    let mut s = String::new();
+    file.read_to_string(&mut s).expect("failed to read file.");
+
+    let line = s
+        .split("\n")
+        .filter(|s| s.to_string() != "")
+        .collect::<Vec<&str>>();
+    let keys = vec!["pref", "city", "temp", "date"];
+    let map = keys
+        .iter()
+        .cloned()
+        .map(|key| 
+            
+        )
+        .zip(line.iter().cloned())
+        .collect::<Vec<HashMap<&str, &str>>>();
+
+    map.iter().for_each(|m| println!("{:?}", m.values()));
+}
