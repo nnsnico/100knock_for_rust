@@ -189,26 +189,64 @@ pub fn sec_2_18() {
 
     merge.iter().for_each(|s| println!("{}", s));
 }
+
+/*
+ * 1. カラムを1列目だけに絞る(split, filter)
+ * 2. ベクター内のかぶっている要素をカウント(set, vec, fold)
+ * 3. カウントをもとにソートしたものの要素だけを表示する
+ **/
+pub fn sec_2_19() {
+    let mut file = fs::File::open("col1.txt").expect("failed to open file.");
+    let mut s = String::new();
+    file.read_to_string(&mut s).expect("failed to read file.");
+
+    let col1: Vec<&str> = s
+        .split("\n")
+        .filter(|s| s.to_string() != "")
+        .map(|s: &str| s.split("\t").nth(0).unwrap())
+        .collect();
+
+    let count: HashMap<&str, u32> =
+        col1.iter()
+            .cloned()
+            .fold(HashMap::new(), |mut acc: HashMap<&str, u32>, s: &str| {
+                if acc.contains_key(s) {
+                    if let Some(x) = acc.get_mut(s) {
+                        *x += 1;
+                    };
+                    acc
+                } else {
+                    acc.insert(s, 1);
+                    acc
+                }
+            });
+
+    println!("{:?}", count);
+}
+
 use std::collections::HashMap;
 
-pub fn sec_2_18() {
+pub fn sec_ext_map() {
     let mut file = fs::File::open("hightemp.txt").expect("failed to open file.");
     let mut s = String::new();
     file.read_to_string(&mut s).expect("failed to read file.");
 
-    let line = s
+    let cols = s
         .split("\n")
         .filter(|s| s.to_string() != "")
         .collect::<Vec<&str>>();
     let keys = vec!["pref", "city", "temp", "date"];
-    let map = keys
+    let map = cols
         .iter()
         .cloned()
-        .map(|key| 
-            
-        )
-        .zip(line.iter().cloned())
+        .map(|col: &str| {
+            let values = col.split("\t").collect::<Vec<&str>>();
+            keys.iter()
+                .cloned()
+                .zip(values.iter().cloned())
+                .collect::<HashMap<&str, &str>>()
+        })
         .collect::<Vec<HashMap<&str, &str>>>();
 
-    map.iter().for_each(|m| println!("{:?}", m.values()));
+    map.iter().for_each(|s| println!("{:?}", s));
 }
