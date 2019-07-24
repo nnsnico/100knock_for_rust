@@ -162,6 +162,33 @@ pub fn sec_2_17() {
     set.iter().for_each(|s| println!("{}", s));
 }
 
+pub fn sec_2_18() {
+    let mut file = fs::File::open("hightemp.txt").expect("failed to open file.");
+    let mut s = String::new();
+    file.read_to_string(&mut s).expect("failed to read file.");
+
+    let cols: Vec<&str> = s.split("\n").filter(|s| s.to_string() != "").collect();
+    let mut matrix: Vec<Vec<&str>> = cols
+        .iter()
+        .map(|col| col.split("\t").collect::<Vec<&str>>())
+        .collect();
+    matrix.sort_unstable_by(|_col: &Vec<&str>, col: &Vec<&str>| {
+        let parsed_col: f32 = _col[2].parse().unwrap();
+        let parsed_col2: f32 = col[2].parse().unwrap();
+        parsed_col.partial_cmp(&parsed_col2).unwrap()
+    });
+
+    let merge: Vec<String> = matrix
+        .iter()
+        .cloned()
+        .map(|v: Vec<&str>| {
+            let str_vec: Vec<String> = v.iter().map(|s| s.to_string()).collect();
+            str_vec.join("\t")
+        })
+        .collect();
+
+    merge.iter().for_each(|s| println!("{}", s));
+}
 use std::collections::HashMap;
 
 pub fn sec_2_18() {
