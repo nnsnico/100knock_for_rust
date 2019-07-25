@@ -190,11 +190,6 @@ pub fn sec_2_18() {
     merge.iter().for_each(|s| println!("{}", s));
 }
 
-/*
- * 1. カラムを1列目だけに絞る(split, filter)
- * 2. ベクター内のかぶっている要素をカウント(set, vec, fold)
- * 3. カウントをもとにソートしたものの要素だけを表示する
- **/
 pub fn sec_2_19() {
     let mut file = fs::File::open("col1.txt").expect("failed to open file.");
     let mut s = String::new();
@@ -206,10 +201,10 @@ pub fn sec_2_19() {
         .map(|s: &str| s.split("\t").nth(0).unwrap())
         .collect();
 
-    let count: HashMap<&str, u32> =
+    let count: HashMap<&str, usize> =
         col1.iter()
             .cloned()
-            .fold(HashMap::new(), |mut acc: HashMap<&str, u32>, s: &str| {
+            .fold(HashMap::new(), |mut acc: HashMap<&str, usize>, s: &str| {
                 if acc.contains_key(s) {
                     if let Some(x) = acc.get_mut(s) {
                         *x += 1;
@@ -220,8 +215,12 @@ pub fn sec_2_19() {
                     acc
                 }
             });
+    let mut count_vec: Vec<(&str, usize)> = count.iter().map(|(a, b)| (*a, *b)).collect();
+    count_vec.sort_by(|(_, b1), (_, b2)| b2.partial_cmp(b1).unwrap());
 
-    println!("{:?}", count);
+    count_vec
+        .iter()
+        .for_each(|(s, i)| println!("   {} {}", i, s));
 }
 
 use std::collections::HashMap;
