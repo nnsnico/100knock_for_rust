@@ -199,18 +199,25 @@ pub fn sec_3_26() {
                 .next()
         })
         .unwrap();
-    let regex = Regex::new(r"\|(.+)(\s+)=(\s+)(.+)\n").unwrap();
-    let regex_highlight = Regex::new(r"(.+?)('+)(.+?)('+)(.+)").unwrap();
-    let basic_info: HashMap<&str, &str> = regex
+
+    let regex_basic_info: Regex = Regex::new(r"(?m)^\{\{基礎情報.*?\n(.*?)\n\}\}$").unwrap();
+    let regex_kv: Regex = Regex::new(r"(?m)^\|(.+?)\s*=\s*(.+?)(?:(?=\n\|)|(?=\n$))").unwrap();
+    let basic_info: String = regex_basic_info
         .captures_iter(&uk.text)
-        .map(|info| {
-            let k = info.at(1).unwrap();
-            let v = info.at(4).unwrap();
+        .map(|cap: Captures| cap.at(1).unwrap())
+        .collect();
+    let parsed_kv: HashMap<&str, &str> = regex_kv
+        .captures_iter(&basic_info)
+        .map(|cap| {
+            let k = cap.at(1).unwrap();
+            let v = cap.at(2).unwrap();
             (k, v)
         })
         .collect();
 
-    let info_without_highlight: HashMap<&str, String> = basic_info
+    let regex_highlight = Regex::new(r"(.+?)('+)(.+?)('+)(.+)").unwrap();
+
+    let info_without_highlight: HashMap<&str, String> = parsed_kv
         .iter()
         .map(|(k, v)| {
             let highlight = regex_highlight.replace(v, |cap: &Captures| {
@@ -248,19 +255,25 @@ pub fn sec_3_27() {
                 .next()
         })
         .unwrap();
-    let regex = Regex::new(r"\|(.+)(\s+)=(\s+)([^(?=\n\|)])]").unwrap();
-    let regex_highlight_or_link = Regex::new(r"(.*?)('+|\[+)(.+?)('+|\]+)(.*)").unwrap();
-    let basic_info: HashMap<&str, &str> = regex
+
+    let regex_basic_info: Regex = Regex::new(r"(?m)^\{\{基礎情報.*?\n(.*?)\n\}\}$").unwrap();
+    let regex_kv: Regex = Regex::new(r"(?m)^\|(.+?)\s*=\s*(.+?)(?:(?=\n\|)|(?=\n$))").unwrap();
+    let basic_info: String = regex_basic_info
         .captures_iter(&uk.text)
-        .map(|info| {
-            println!("{:?}", info);
-            let k = info.at(1).unwrap();
-            let v = info.at(4).unwrap();
+        .map(|cap: Captures| cap.at(1).unwrap())
+        .collect();
+    let parsed_kv: HashMap<&str, &str> = regex_kv
+        .captures_iter(&basic_info)
+        .map(|cap| {
+            let k = cap.at(1).unwrap();
+            let v = cap.at(2).unwrap();
             (k, v)
         })
         .collect();
 
-    let info_without_highlight: HashMap<&str, String> = basic_info
+    let regex_highlight_or_link = Regex::new(r"(.*?)'+|\[+(.+?)'+|\]+(.*)").unwrap();
+
+    let info_without_highlight: HashMap<&str, String> = parsed_kv
         .iter()
         .map(|(k, v)| {
             let highlight = regex_highlight_or_link.replace(v, |cap: &Captures| {
@@ -277,78 +290,5 @@ pub fn sec_3_27() {
 
     info_without_highlight
         .iter()
-        .for_each(|s| println!("{} {:?}", s.0, s.1));
-}
-
-#[test]
-pub fn test_sec26() {
-    use regex::Match;
-
-    let s =
-        "現在の国号「'''グレートブリテン及び北アイルランド連合王国'''」に変更";
-    let right_group: Vec<&str> = vec![
-        s,
-        "現在の国号「",
-        "'''",
-        "グレートブリテン及び北アイルランド連合王国",
-        "'''",
-        "」に変更",
-    ];
-    let regex = Regex::new(r"(.*?)('+)(.+?)('+)(.*)").unwrap();
-    let matched_group: Vec<&str> = regex
-        .captures_iter(&s)
-        .flat_map(|cap: Captures| {
-            let match_group: Vec<&str> = cap
-                .iter()
-                .map(|v: Option<Match>| v.unwrap().as_str())
-                .collect();
-            match_group
-        })
-        .collect();
-
-    assert_eq!(matched_group, right_group)
-}
-
-#[test]
-pub fn test_sec27() {
-    use regex::Match;
-
-    let s = "[[ロンドン]]";
-    let right_group: Vec<&str> = vec![s, "[[", "ロンドン", "]]"];
-    let regex = Regex::new(r"(.*?)('+|\[\[)(.+?)('+|\]\])(.*)").unwrap();
-    let matched_group: Vec<&str> = regex
-        .captures_iter(&s)
-        .flat_map(|cap: Captures| {
-            let match_group: Vec<&str> = cap
-                .iter()
-                .map(|v: Option<Match>| v.unwrap().as_str())
-                .filter(|s| s != &"")
-                .collect();
-            match_group
-        })
-        .collect();
-
-    assert_eq!(matched_group, right_group)
-}
-
-pub fn test_sec27_2() {
-    let s = r"
-|公式国名 = {{lang|en|United Kingdom of Great Britain and Northern Ireland}}<ref>英語以外での正式国名:<br/>
-*{{lang|gd|An Rìoghachd Aonaichte na Breatainn Mhòr agus Eirinn mu Thuath}}（[[スコットランド・ゲール語]]）<br/>
-*{{lang|cy|Teyrnas Gyfunol Prydain Fawr a Gogledd Iwerddon}}（[[ウェールズ語]]）<br/>
-*{{lang|ga|Ríocht Aontaithe na Breataine Móire agus Tuaisceart na hÉireann}}（[[アイルランド語]]）<br/>
-*{{lang|kw|An Rywvaneth Unys a Vreten Veur hag Iwerdhon Glédh}}（[[コーンウォール語]]）<br/>
-*{{lang|sco|Unitit Kinrick o Great Breetain an Northren Ireland}}（[[スコットランド語]]）<br/>
-**{{lang|sco|Claught Kängrick o Docht Brätain an Norlin Airlann}}、{{lang|sco|Unitet Kängdom o Great Brittain an Norlin Airlann}}（アルスター・スコットランド語）</ref>
-|国旗画像 = Flag of the United Kingdom.svg
-|国章画像 = [[ファイル:Royal Coat of Arms of the United Kingdom.svg|85px|イギリスの国章]]
-";
-
-    let regex_kv: Regex = Regex::new(r"(?m)^\|(.+?)\s*=\s*(.+?)(?:(?=\n\|)|(?=\n$))").unwrap();
-
-    regex_kv.captures_iter(&s).for_each(|c: Captures| {
-        let k = c.at(1).unwrap();
-        let v = c.at(2).unwrap();
-        println!("{}: {}", k, v);
-    });
+        .for_each(|s| println!("({}, {})", s.0, s.1));
 }
