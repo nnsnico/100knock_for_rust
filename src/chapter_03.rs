@@ -258,6 +258,9 @@ pub fn sec_3_27() {
 
     let regex_basic_info: Regex = Regex::new(r"(?m)^\{\{基礎情報.*?\n(.*?)\n\}\}$").unwrap();
     let regex_kv: Regex = Regex::new(r"(?m)^\|(.+?)\s*=\s*(.+?)(?:(?=\n\|)|(?=\n$))").unwrap();
+    let regex_emphasize = Regex::new(r"(?m)(.*?)('{2,5})(.*?)('{2,5})(.*)").unwrap();
+    let regex_link = Regex::new(r"(?m)\[\[(?:[^|]*?\|)??([^|]*?)\]\]").unwrap();
+
     let basic_info: String = regex_basic_info
         .captures_iter(&uk.text)
         .map(|cap: Captures| cap.at(1).unwrap())
@@ -271,24 +274,26 @@ pub fn sec_3_27() {
         })
         .collect();
 
-    let regex_highlight_or_link = Regex::new(r"(.*?)'+|\[+(.+?)'+|\]+(.*)").unwrap();
-
-    let info_without_highlight: HashMap<&str, String> = parsed_kv
+    let without_emphasize: Vec<(&str, String)> = parsed_kv
         .iter()
         .map(|(k, v)| {
-            let highlight = regex_highlight_or_link.replace(v, |cap: &Captures| {
-                format!(
-                    "{}{}{}",
-                    &cap.at(1).unwrap(),
-                    &cap.at(3).unwrap(),
-                    &cap.at(5).unwrap()
-                )
-            });
-            (*k, highlight.chars().collect::<String>())
+            let removed: String =
+                regex_emphasize.replace(v, |cap: &Captures| format!("{}", cap.at(2).unwrap()));
+
+            (*k, removed)
         })
         .collect();
 
-    info_without_highlight
+    let without_link: Vec<(&str, String)> = without_emphasize
+        .iter()
+        .map(|(k, v)| {
+            let removed: String =
+                regex_link.replace(v, |cap: &Captures| format!("{}", cap.at(1).unwrap()));
+            (*k, removed)
+        })
+        .collect();
+
+    without_link
         .iter()
         .for_each(|s| println!("({}, {})", s.0, s.1));
 }
