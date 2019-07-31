@@ -13,7 +13,7 @@ pub fn test_sec26() {
         "'''",
         "」に変更",
     ];
-    let regex = Regex::new(r"(.*?)('+)(.+?)('+)(.*)").unwrap();
+    let regex = Regex::new(r"(.*?)('{2,5})(.+?)('{2,5})(.*)").unwrap();
     let matched_group: Vec<String> = regex
         .captures_iter(&s)
         .flat_map(|cap: Captures| {
@@ -72,7 +72,6 @@ pub fn test_sec27_2() {
     assert_eq!(target, ans)
 }
 
-#[test]
 pub fn test_sec27_3() {
     let s = "|公式国名 = {{lang|en|United Kingdom of Great Britain and Northern Ireland}}<ref>英語以外での正式国名:<br/>\n*{{lang|gd|An Rìoghachd Aonaichte na Breatainn Mhòr agus Eirinn mu Thuath}}（[[スコットランド・ゲール語]]）<br/>\n*{{lang|cy|Teyrnas Gyfunol Prydain Fawr a Gogledd Iwerddon}}（[[ウェールズ語]]）<br/>\n*{{lang|ga|Ríocht Aontaithe na Breataine Móire agus Tuaisceart na hÉireann}}（[[アイルランド語]]）<br/>\n*{{lang|kw|An Rywvaneth Unys a Vreten Veur hag Iwerdhon Glédh}}（[[コーンウォール語]]）<br/>\n*{{lang|sco|Unitit Kinrick o Great Breetain an Northren Ireland}}（[[スコットランド語]]）<br/>\n**{{lang|sco|Claught Kängrick o Docht Brätain an Norlin Airlann}}、{{lang|sco|Unitet Kängdom o Great Brittain an Norlin Airlann}}（アルスター・スコットランド語）</ref>\n|国旗画像 = Flag of the United Kingdom.svg\n|国章画像 = [[ファイル:Royal Coat of Arms of the United Kingdom.svg|85px|イギリスの国章]]\n";
 
@@ -85,7 +84,8 @@ pub fn test_sec27_3() {
     let ans: Vec<(&str, String)> = ans.iter().map(|(k, v)| (*k, v.to_string())).collect();
 
     let regex_kv: Regex = Regex::new(r"(?m)^\|(.+?)\s*=\s*(.+?)(?:(?=\n\|)|(?=\n$))").unwrap();
-    let regex_emphasize = Regex::new(r"(.*?)('+)(.+?)('+)(.*)").unwrap();
+    let regex_emphasize = Regex::new(r"(.*?)('{2,5})(.*?)('{2,5})(.*)").unwrap();
+    let regex_link = Regex::new(r"\[\[(?:[^|]*?\|)??([^|]*?)\]\]").unwrap();
 
     let kv: Vec<(&str, &str)> = regex_kv
         .captures_iter(s)
@@ -114,6 +114,17 @@ pub fn test_sec27_3() {
             (*k, del_emphasize)
         })
         .collect();
+    let remove_link: Vec<(&str, String)> = remove_emphasize
+        .iter()
+        .map(|(k, v)| {
+            let del_link: String = regex_link
+                .captures(v)
+                .map(|c: Captures| format!("{}{}", c.at(1).unwrap(), c.at(2).unwrap()))
+                .unwrap();
 
-    assert_eq!(remove_emphasize, ans)
+            (*k, del_link)
+        })
+        .collect();
+
+    assert_eq!(remove_link, ans)
 }
